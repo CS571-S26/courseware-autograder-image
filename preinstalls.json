@@ -1,0 +1,9 @@
+{
+  "name": "cs571-playwright-preinstalls",
+  "private": true,
+  "license": "MIT",
+  "dependencies": {
+    "playwright": "1.57.0",
+    "http-server": "14.1.1"
+  }
+}
