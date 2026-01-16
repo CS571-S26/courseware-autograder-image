@@ -1,4 +1,20 @@
-FROM node:22
+
+ARG GRADESCOPE_VERSION=ubuntu-jammy
+
+FROM gradescope/autograder-base:${GRADESCOPE_VERSION}
+
+# NOTE: Playwright version is locked in within preinstalls/package.json.
+ARG NODE_VERSION=22
+ARG HTTP_SERVER_VERSION=14.1.1
+
+# Install Node.js (LTS) from NodeSource
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends curl ca-certificates gnupg \
+	&& curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - \
+	&& apt-get install -y --no-install-recommends nodejs \
+	&& rm -rf /var/lib/apt/lists/* \
+	&& ln -sf /usr/bin/npm /usr/local/bin/npm || true \
+	&& ln -sf /usr/bin/npx /usr/local/bin/npx || true
 
 # Install OS-level dependencies commonly required by Playwright browsers
 RUN apt-get update \
@@ -8,28 +24,10 @@ RUN apt-get update \
 		libasound2 libxrandr2 libgbm1 libpangocairo-1.0-0 libatspi2.0-0 fonts-liberation \
 	&& rm -rf /var/lib/apt/lists/*
 
-WORKDIR /cs571
-RUN useradd -m cs571bot && chown -R cs571bot:cs571bot /cs571
-
 # Preinstall some dependencies to be ready at runtime.
-COPY preinstalls.json /cs571/.preinstalls/package.json
-
-RUN mkdir -p /home/cs571bot/.cache/ms-playwright && \
-	cd /cs571/.preinstalls && \
-	npm i --no-audit --no-fund && \
-	PLAYWRIGHT_BROWSERS_PATH=/home/cs571bot/.cache/ms-playwright npx playwright install --with-deps && \
-	# Ensure the installed node_modules and browser caches are owned by cs571bot
-	chown -R cs571bot:cs571bot /cs571/.preinstalls /home/cs571bot/.cache/ms-playwright /home/cs571bot
-
-COPY entrypoint.sh /cs571/entrypoint.sh
-RUN chmod +x /cs571/entrypoint.sh && chown cs571bot:cs571bot /cs571/entrypoint.sh
-
-RUN mkdir /cs571_go
-RUN chown cs571bot:cs571bot /cs571_go
-
-USER cs571bot
-
-VOLUME ["/cs571/src", "/cs571/test", "/cs571/script.sh"]
-
-# NOTE: script.sh is expected to be mounted at runtime to /cs571/script.sh; the entrypoint normalizes CRLF and runs it.
-ENTRYPOINT ["/cs571/entrypoint.sh"]
+COPY preinstalls /autograder/.preinstalls
+RUN mkdir -p /home/root/.cache/ms-playwright && \
+	cd /autograder/.preinstalls && \
+	npm ci --no-audit --no-fund && \
+	PLAYWRIGHT_BROWSERS_PATH=/home/root/.cache/ms-playwright npx playwright install chromium --with-deps
+RUN npm i -g http-server@${HTTP_SERVER_VERSION}

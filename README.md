@@ -1,25 +1,16 @@
 # courseware-autograder-image
+Contains the base autograder image, built off `gradescope/autograder-base`. This image contains node, npm, and playwright dependencies pre-installed. **Not to be used standalone**, intended for use as a base image for other course autograders.
 
-This Docker image runs Playwright JS tests mounted from the host against a mounted web project with a mounted script.
-
-Overview
-- Mount runner script to `/cs571/script.sh`, student source to `/cs571/src`, and Playwright tests to `/cs571/test` when running the container.
-- The image preinstalls Playwright, its browser binaries, and a lightweight static server (`http-server`) at build time so runs are fast and deterministic.
-
-Expected Mounts
-- `/cs571/script.sh` —  runner script
-- `/cs571/src` — student/source files (HTML/CSS/JS or a React/Vite project)
-- `/cs571/test` — Playwright tests (JS)
+## Updating
+Playwright versions are locked in the ci process for consistency. To update, edit `preinstalls/package.json` with the latest dependencies and run `npm i` *before* the docker build process prescribed below.
 
 ## Build
-
-```powershell
-docker build -t ctnelson1997/cs571-playwright .
+```bash
+docker build -t ctnelson1997/cs571-f25-autograder-image .
+docker push ctnelson1997/cs571-f25-autograder-image
 ```
 
-## Run
-```powershell
-docker run --rm -v ${PWD}/src:/cs571/src:ro -v ${PWD}/test:/cs571/test:ro -v ${PWD}/script.sh:/cs571/script.sh:ro --shm-size=2g ctnelson1997/cs571-playwright HTML
+## Use
+```docker
+FROM ctnelson1997/cs571-f25-autograder-image
 ```
-
-See `courseware-autograder-script` for script parameters like `HTML` and `REACT`.
