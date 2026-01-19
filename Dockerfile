@@ -4,7 +4,7 @@ ARG GRADESCOPE_VERSION=ubuntu-jammy
 FROM gradescope/autograder-base:${GRADESCOPE_VERSION}
 
 # NOTE: Playwright version is locked in within preinstalls/package.json.
-ARG NODE_VERSION=22
+ARG NODE_VERSION=24
 ARG HTTP_SERVER_VERSION=14.1.1
 
 # Install Node.js (LTS) from NodeSource
