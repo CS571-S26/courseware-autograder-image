@@ -6,11 +6,11 @@ Playwright versions are locked in the ci process for consistency. To update, edi
 
 ## Build
 ```bash
-docker build -t uwcs571/f25-autograder-image .
-docker push uwcs571/f25-autograder-image
+docker build -t ctnelson1997/cs571-s26-autograder-image .
+docker push ctnelson1997/cs571-s26-autograder-image
 ```
 
 ## Use
 ```docker
-FROM uwcs571/f25-autograder-image
+FROM ctnelson1997/cs571-s26-autograder-image
 ```
